@@ -13,6 +13,11 @@ export const auth = betterAuth({
     database: {
       generateId: () => nanoid(),
     },
+    // Behind Cloudflare -> cloudflared -> Caddy every request comes from Caddy's Docker IP.
+    // Read the real client IP so rate limits are per visitor, not shared by everyone.
+    ipAddress: {
+      ipAddressHeaders: ['cf-connecting-ip', 'x-forwarded-for'],
+    },
   },
   emailAndPassword: {
     enabled: true,

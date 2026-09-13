@@ -79,17 +79,19 @@ function LoginPage() {
               {mode === 'signup' ? 'Sign up' : 'Sign in'}
             </Button>
           </form>
-          <p className="mt-4 text-center text-sm text-muted-foreground">
-            {mode === 'signup' ? (
-              <Link to="/login" search={{ mode: 'signin', redirect }}>
-                Have an account? Sign in
-              </Link>
-            ) : (
-              <Link to="/login" search={{ mode: 'signup', redirect }}>
-                No account? Sign up
-              </Link>
-            )}
-          </p>
+          {signupOpen && (
+            <p className="mt-4 text-center text-sm text-muted-foreground">
+              {mode === 'signup' ? (
+                <Link to="/login" search={{ mode: 'signin', redirect }}>
+                  Have an account? Sign in
+                </Link>
+              ) : (
+                <Link to="/login" search={{ mode: 'signup', redirect }}>
+                  No account? Sign up
+                </Link>
+              )}
+            </p>
+          )}
         </CardContent>
       </Card>
     </div>

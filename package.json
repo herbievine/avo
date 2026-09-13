@@ -25,7 +25,8 @@
     "icons": "tsx scripts/icons.ts",
     "shots": "tsx scripts/screenshots.ts",
     "migrate:orgs": "tsx scripts/migrate-orgs.ts",
-    "move-account": "tsx scripts/move-account.ts"
+    "move-account": "tsx scripts/move-account.ts",
+    "delete-user": "tsx scripts/delete-user.ts"
   },
   "dependencies": {
     "@faker-js/faker": "^10.3.0",
