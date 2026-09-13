@@ -72,6 +72,7 @@ const pages = [
   ['transactions', '/transactions'],
   ['banks', '/connect'],
   ['categorize', '/categorize'],
+  ['categories', '/categories'],
   ['not-found', '/nope'],
 ] as const
 

@@ -143,15 +143,32 @@ export function SpendHero({
   daysInMonth,
   daily,
   totalCents,
+  previousTotalCents,
+  previousMonth,
 }: {
   month: string
   daysInMonth: number
   daily: Array<{ date: string; spentCents: number }>
   totalCents: number
+  previousTotalCents: number
+  previousMonth: string
 }) {
   const [scrub, setScrub] = useState<DayPoint | null>(null)
   const today = new Date().toISOString().slice(0, 10)
   const points = cumulativePoints(month, daysInMonth, daily, today)
+  const isCurrent = today.slice(0, 7) === month
+  const elapsed = points.length
+  // Spending pace: straight-line projection of the month from what's spent so far.
+  const projected =
+    isCurrent && elapsed > 0 && elapsed < daysInMonth
+      ? Math.round((totalCents / elapsed) * daysInMonth)
+      : null
+  const delta =
+    previousTotalCents > 0 ? (totalCents - previousTotalCents) / previousTotalCents : null
+  const prevLabel = new Date(`${previousMonth}-01T00:00:00Z`).toLocaleDateString('en-GB', {
+    month: 'short',
+    timeZone: 'UTC',
+  })
 
   return (
     <section className="rounded-2xl bg-foreground p-6 text-background sm:p-8">
@@ -166,9 +183,14 @@ export function SpendHero({
           ? scrub.dayCents > 0
             ? `${formatCents(scrub.dayCents)} that day`
             : 'Nothing that day'
-          : points.length > 0
-            ? 'Hold the chart to see a day'
-            : ''}
+          : [
+              delta !== null
+                ? `${delta >= 0 ? '▲' : '▼'} ${Math.abs(Math.round(delta * 100))}% vs ${prevLabel}`
+                : null,
+              projected !== null ? `on pace for ${formatCents(projected)}` : null,
+            ]
+              .filter(Boolean)
+              .join(' · ') || (points.length > 0 ? 'Hold the chart to see a day' : '')}
       </p>
       <div className="mt-4">
         <SpendChart points={points} daysInMonth={daysInMonth} onScrub={setScrub} />

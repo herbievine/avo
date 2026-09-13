@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
+import { Link, createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 import {
   columnVisibilityFeature,
@@ -13,6 +13,7 @@ import { ArrowDown, ArrowUp, ArrowUpDown, Search, Settings2, Sparkles } from 'lu
 import { z } from 'zod'
 
 import { applyRulesFn, listConnectionsFn } from '#/fns/bank'
+import { setMerchantCategoryFn } from '#/fns/categories'
 import { isoDateSchema, listCategoriesFn, listTransactionsFn } from '#/fns/transactions'
 import { monthRange } from '#/lib/dates'
 import { accountLabel, firstName, formatCents } from '#/lib/money'
@@ -109,6 +110,48 @@ function SortHeader({
   )
 }
 
+/** Badge that opens a category select; changes apply to the merchant (all its transactions). */
+function CategoryPicker({
+  merchantId,
+  categoryId,
+  label,
+  categories,
+}: {
+  merchantId: string
+  categoryId: string | null
+  label: string | null
+  categories: Array<{ id: string; name: string }>
+}) {
+  const router = useRouter()
+  const setCategory = useServerFn(setMerchantCategoryFn)
+  return (
+    <Select
+      value={categoryId ?? 'none'}
+      onValueChange={async (v) => {
+        await setCategory({ data: { merchantId, categoryId: v === 'none' ? null : v } })
+        await router.invalidate()
+      }}
+    >
+      <SelectTrigger
+        size="sm"
+        aria-label="Change category"
+        className="h-7 w-auto gap-1 rounded-full border-transparent bg-secondary px-2.5 text-xs font-normal shadow-none hover:border-input [&>svg]:size-3"
+      >
+        <SelectValue placeholder="—">{label ?? '—'}</SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        {categories.map((c) => (
+          <SelectItem key={c.id} value={c.id}>
+            {c.name}
+          </SelectItem>
+        ))}
+        <SelectSeparator />
+        <SelectItem value="none">No category</SelectItem>
+      </SelectContent>
+    </Select>
+  )
+}
+
 const shortDate = (iso: string) =>
   new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-GB', {
     day: 'numeric',
@@ -165,12 +208,20 @@ function TransactionsPage() {
     col.accessor('category', {
       header: 'Category',
       cell: (c) =>
-        c.getValue() ? (
-          <Badge variant="secondary" className="font-normal">
-            {c.getValue()}
-          </Badge>
+        c.row.original.merchantId ? (
+          <CategoryPicker
+            merchantId={c.row.original.merchantId}
+            categoryId={c.row.original.categoryId}
+            label={c.getValue()}
+            categories={categories}
+          />
         ) : (
-          <span className="text-xs text-muted-foreground">—</span>
+          <Link
+            to="/categorize"
+            className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+          >
+            Categorize
+          </Link>
         ),
     }),
     col.accessor('bank', {

@@ -2,7 +2,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { z } from 'zod'
 
 import { requireOrg } from '#/server/org'
-import { listCategories, listTransactions, monthSummary } from '#/server/transactions'
+import { listCategories, listTransactions, monthSummary, recurring } from '#/server/transactions'
 
 export const monthSchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'Expected YYYY-MM')
 
@@ -30,3 +30,7 @@ export const listTransactionsFn = createServerFn({ method: 'GET' })
 export const monthSummaryFn = createServerFn({ method: 'GET' })
   .validator(monthSchema)
   .handler(async ({ data }) => monthSummary((await requireOrg()).id, data))
+
+export const recurringFn = createServerFn({ method: 'GET' }).handler(async () =>
+  recurring((await requireOrg()).id),
+)

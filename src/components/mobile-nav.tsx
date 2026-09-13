@@ -1,5 +1,5 @@
 import { Link, linkOptions, useNavigate, useRouterState } from '@tanstack/react-router'
-import { Landmark, LayoutDashboard, LogOut, ReceiptText, Tags } from 'lucide-react'
+import { Landmark, LayoutDashboard, LogOut, ReceiptText, Shapes, Tags } from 'lucide-react'
 
 import { authClient } from '#/lib/auth-client'
 import { defaultTransactionsSearch } from '#/lib/dates'
@@ -23,24 +23,40 @@ export const NAV = [
     link: linkOptions({ to: '/', search: {} }),
     icon: LayoutDashboard,
     exact: true,
+    group: 'Money',
+    mobile: true,
   },
   {
     title: 'Transactions',
     link: linkOptions({ to: '/transactions', search: defaultTransactionsSearch() }),
     icon: ReceiptText,
     exact: false,
+    group: 'Money',
+    mobile: true,
   },
   {
     title: 'To categorize',
     link: linkOptions({ to: '/categorize' }),
     icon: Tags,
     exact: false,
+    group: 'Money',
+    mobile: true,
+  },
+  {
+    title: 'Categories',
+    link: linkOptions({ to: '/categories' }),
+    icon: Shapes,
+    exact: false,
+    group: 'Manage',
+    mobile: false,
   },
   {
     title: 'Banks',
     link: linkOptions({ to: '/connect', search: { country: 'FR' } }),
     icon: Landmark,
     exact: false,
+    group: 'Manage',
+    mobile: true,
   },
 ]
 
@@ -106,7 +122,7 @@ export function MobileTabBar() {
       className="fixed inset-x-0 bottom-0 z-20 border-t bg-background/85 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
     >
       <ul className="grid grid-cols-4">
-        {NAV.map((item) => {
+        {NAV.filter((i) => i.mobile).map((item) => {
           const active = isActive(item.link.to, item.exact)
           return (
             <li key={item.link.to}>

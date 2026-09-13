@@ -2,7 +2,7 @@ import { Await, Link, createFileRoute, linkOptions, type LinkOptions } from '@ta
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { z } from 'zod'
 
-import { monthSchema, monthSummaryFn } from '#/fns/transactions'
+import { monthSchema, monthSummaryFn, recurringFn } from '#/fns/transactions'
 import { monthLabel, monthRange, shiftMonth } from '#/lib/dates'
 import { currentMonth, formatCents } from '#/lib/money'
 import { SpendHero } from '#/components/spend-chart'
@@ -16,12 +16,13 @@ export const Route = createFileRoute('/_authed/')({
     month: deps.month,
     // Not awaited: the shell renders immediately and the summary streams in.
     summary: monthSummaryFn({ data: deps.month }),
+    recurring: recurringFn(),
   }),
   component: Overview,
 })
 
 function Overview() {
-  const { month, summary } = Route.useLoaderData()
+  const { month, summary, recurring } = Route.useLoaderData()
   const isCurrent = month === currentMonth()
   const range = monthRange(month)
   const txSearch = { ...range, page: 1, sort: 'date' as const, dir: 'desc' as const }
@@ -54,8 +55,17 @@ function Overview() {
       </header>
 
       <Await promise={summary} fallback={<OverviewSkeleton />}>
-        {({ byCategory, uncategorizedCents, daily }) => {
+        {({
+          byCategory,
+          uncategorizedCents,
+          previousUncategorizedCents,
+          previousMonth,
+          topMerchants,
+          daily,
+        }) => {
           const spent = byCategory.reduce((s, c) => s + c.spentCents, 0) + uncategorizedCents
+          const previousSpent =
+            byCategory.reduce((s, c) => s + c.previousSpentCents, 0) + previousUncategorizedCents
           const budget = byCategory.reduce((s, c) => s + (c.budgetCents ?? 0), 0)
           const budgetedSpent = byCategory
             .filter((c) => c.budgetCents !== null)
@@ -67,7 +77,14 @@ function Overview() {
 
           return (
             <>
-              <SpendHero month={month} daysInMonth={daysInMonth} daily={daily} totalCents={spent} />
+              <SpendHero
+                month={month}
+                daysInMonth={daysInMonth}
+                daily={daily}
+                totalCents={spent}
+                previousTotalCents={previousSpent}
+                previousMonth={previousMonth}
+              />
 
               {/* Tiles */}
               <section className="grid grid-cols-2 gap-3">
@@ -132,6 +149,11 @@ function Overview() {
                                   {formatCents(c.spentCents)}
                                 </span>
                               </div>
+                              {c.budgetCents === null && c.previousSpentCents > 0 && (
+                                <p className="mt-0.5 text-xs text-muted-foreground tabular-nums">
+                                  {formatCents(c.previousSpentCents)} last month
+                                </p>
+                              )}
                               {c.budgetCents !== null && (
                                 <div className="mt-2 flex items-center gap-3">
                                   <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
@@ -158,9 +180,60 @@ function Overview() {
                   </ul>
                 )}
               </section>
+
+              {topMerchants.length > 0 && (
+                <section className="space-y-3">
+                  <h2 className="text-sm font-medium text-muted-foreground">Top merchants</h2>
+                  <ul className="divide-y overflow-hidden rounded-2xl border">
+                    {topMerchants.map((m) => (
+                      <li key={m.id} className="flex items-center gap-4 px-4 py-3">
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium">{m.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {m.count} × {m.category ? `· ${m.category}` : ''}
+                          </p>
+                        </div>
+                        <span className="text-sm font-medium tabular-nums">
+                          {formatCents(m.spentCents)}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              )}
             </>
           )
         }}
+      </Await>
+
+      <Await promise={recurring} fallback={null}>
+        {(items) =>
+          items.length > 0 && (
+            <section className="space-y-3">
+              <div className="flex items-baseline justify-between">
+                <h2 className="text-sm font-medium text-muted-foreground">Recurring</h2>
+                <span className="text-xs text-muted-foreground tabular-nums">
+                  ≈ {formatCents(items.reduce((s, r) => s + r.monthlyCents, 0))} / month
+                </span>
+              </div>
+              <ul className="divide-y overflow-hidden rounded-2xl border">
+                {items.map((r) => (
+                  <li key={r.merchantId} className="flex items-center gap-4 px-4 py-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">{r.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {r.category ?? 'Uncategorized'} · seen {r.months} months · last {r.lastDate}
+                      </p>
+                    </div>
+                    <span className="text-sm font-medium tabular-nums">
+                      {formatCents(r.monthlyCents)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )
+        }
       </Await>
     </div>
   )

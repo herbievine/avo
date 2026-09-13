@@ -54,26 +54,28 @@ export function AppSidebar({
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Money</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {NAV.map((item) => {
-                const active = isActive(item.link.to, item.exact)
-                return (
-                  <SidebarMenuItem key={item.link.to}>
-                    <SidebarMenuButton asChild isActive={active} tooltip={item.title}>
-                      <Link {...item.link} onClick={() => isMobile && setOpenMobile(false)}>
-                        <item.icon />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                )
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {['Money', 'Manage'].map((group) => (
+          <SidebarGroup key={group}>
+            <SidebarGroupLabel>{group}</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {NAV.filter((i) => i.group === group).map((item) => {
+                  const active = isActive(item.link.to, item.exact)
+                  return (
+                    <SidebarMenuItem key={item.link.to}>
+                      <SidebarMenuButton asChild isActive={active} tooltip={item.title}>
+                        <Link {...item.link} onClick={() => isMobile && setOpenMobile(false)}>
+                          <item.icon />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  )
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
       <SidebarFooter>
         <SidebarMenu>

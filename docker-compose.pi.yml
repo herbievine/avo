@@ -33,6 +33,20 @@ services:
       retries: 5
       start_period: 20s
 
+  # Scheduled import + budget alerts: every 6 hours (PSD2 allows ~4 unattended pulls/day).
+  sync:
+    build:
+      context: .
+      target: build
+    env_file: .env
+    environment:
+      DATABASE_URL: /data/avo.db
+      ENABLE_BANKING_KEY_PATH: /data/enable-banking.pem
+    volumes:
+      - ./data:/data
+    command: ['sh', '-c', 'while true; do bun run sync; sleep 21600; done']
+    restart: unless-stopped
+
   # Schema changes: `docker compose -f docker-compose.pi.yml run --rm migrate`
   # (reuses the build stage, which has bun + drizzle-kit).
   migrate:

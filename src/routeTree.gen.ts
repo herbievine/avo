@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthedIndexRouteImport } from './routes/_authed/index'
+import { Route as AuthedCategoriesRouteImport } from './routes/_authed/categories'
 import { Route as AuthedCategorizeRouteImport } from './routes/_authed/categorize'
 import { Route as AuthedConnectRouteImport } from './routes/_authed/connect'
 import { Route as AuthedTransactionsRouteImport } from './routes/_authed/transactions'
@@ -30,6 +31,11 @@ const LoginRoute = LoginRouteImport.update({
 const AuthedIndexRoute = AuthedIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedCategoriesRoute = AuthedCategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
   getParentRoute: () => AuthedRoute,
 } as any)
 const AuthedCategorizeRoute = AuthedCategorizeRouteImport.update({
@@ -62,6 +68,7 @@ const ApiEnablebankingCallbackRoute =
 export interface FileRoutesByFullPath {
   '/': typeof AuthedIndexRoute
   '/login': typeof LoginRoute
+  '/categories': typeof AuthedCategoriesRoute
   '/categorize': typeof AuthedCategorizeRoute
   '/connect': typeof AuthedConnectRoute
   '/transactions': typeof AuthedTransactionsRoute
@@ -70,6 +77,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
+  '/categories': typeof AuthedCategoriesRoute
   '/categorize': typeof AuthedCategorizeRoute
   '/connect': typeof AuthedConnectRoute
   '/transactions': typeof AuthedTransactionsRoute
@@ -81,6 +89,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authed': typeof AuthedRouteWithChildren
   '/login': typeof LoginRoute
+  '/_authed/categories': typeof AuthedCategoriesRoute
   '/_authed/categorize': typeof AuthedCategorizeRoute
   '/_authed/connect': typeof AuthedConnectRoute
   '/_authed/transactions': typeof AuthedTransactionsRoute
@@ -93,6 +102,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/categories'
     | '/categorize'
     | '/connect'
     | '/transactions'
@@ -101,6 +111,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
+    | '/categories'
     | '/categorize'
     | '/connect'
     | '/transactions'
@@ -111,6 +122,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_authed'
     | '/login'
+    | '/_authed/categories'
     | '/_authed/categorize'
     | '/_authed/connect'
     | '/_authed/transactions'
@@ -147,6 +159,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof AuthedIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/categories': {
+      id: '/_authed/categories'
+      path: '/categories'
+      fullPath: '/categories'
+      preLoaderRoute: typeof AuthedCategoriesRouteImport
       parentRoute: typeof AuthedRoute
     }
     '/_authed/categorize': {
@@ -188,6 +207,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthedRouteChildren {
+  AuthedCategoriesRoute: typeof AuthedCategoriesRoute
   AuthedCategorizeRoute: typeof AuthedCategorizeRoute
   AuthedConnectRoute: typeof AuthedConnectRoute
   AuthedTransactionsRoute: typeof AuthedTransactionsRoute
@@ -195,6 +215,7 @@ interface AuthedRouteChildren {
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
+  AuthedCategoriesRoute: AuthedCategoriesRoute,
   AuthedCategorizeRoute: AuthedCategorizeRoute,
   AuthedConnectRoute: AuthedConnectRoute,
   AuthedTransactionsRoute: AuthedTransactionsRoute,
