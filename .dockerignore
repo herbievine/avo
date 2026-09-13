@@ -1,0 +1,11 @@
+node_modules
+.output
+.nitro
+.tanstack
+dist
+*.db
+*.db-*
+.env
+.env.local
+*.pem
+.git

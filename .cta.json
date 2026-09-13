@@ -1,0 +1,30 @@
+{
+  "projectName": "avo",
+  "mode": "file-router",
+  "typescript": true,
+  "tailwind": true,
+  "packageManager": "bun",
+  "git": true,
+  "install": true,
+  "intent": false,
+  "addOnOptions": {
+    "drizzle": {
+      "database": "sqlite"
+    }
+  },
+  "projectPreset": "default",
+  "includeExamples": false,
+  "routerOnly": false,
+  "version": 1,
+  "framework": "react",
+  "chosenAddOns": [
+    "drizzle",
+    "compiler",
+    "shadcn",
+    "t3env",
+    "table",
+    "better-auth",
+    "tanstack-query",
+    "nitro"
+  ]
+}
