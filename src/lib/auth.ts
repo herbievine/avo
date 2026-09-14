@@ -10,6 +10,9 @@ import { db } from '#/db'
 export const auth = betterAuth({
   database: drizzleAdapter(db, { provider: 'sqlite' }),
   advanced: {
+    // Other herbievine.com apps also use Better Auth and set a domain-wide cookie with the
+    // default name; a distinct prefix keeps Avo's session cookie from being shadowed by it.
+    cookiePrefix: 'avo',
     database: {
       generateId: () => nanoid(),
     },
